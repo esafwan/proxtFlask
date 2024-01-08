@@ -1,0 +1,5 @@
+JSESSIONID: Y2-8af86436-1ff5-4246-95ec-d25a6e800197
+ROUTEID: .node3
+anonymous-consents: %5B%5D
+awaf-sid: 68632877b29ff182
+cookie-notification: NOT_ACCEPTED
