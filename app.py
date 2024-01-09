@@ -89,10 +89,12 @@ def send_smtp_email():
     message.attach(MIMEText(body, 'plain'))
 
     # SMTP details
-    smtp_server = "email-smtp.ap-south-1.amazonaws.com"
-    smtp_port = 587  # You can also use 25 or 2587
-    smtp_username = "username"  # Replace with your SMTP username
-    smtp_password = "pass"  # Replace with your SMTP password
+    # SMTP details for SendGrid
+    smtp_server = "smtp.sendgrid.net"
+    smtp_port = 587  # You can also use 25 for unencrypted/TLS connections or 465 for SSL connections
+    smtp_username = "apikey"
+    smtp_password = os.environ.get('SENDGRID_API_KEY')
+
 
     # Send the email
     try:
