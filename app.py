@@ -5,6 +5,9 @@ import random
 import tldextract
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__)
 
@@ -70,6 +73,36 @@ def send_email():
     except Exception as e:
         return jsonify({'error': str(e)})
 
+@app.route('/send-smtp-email', methods=['POST'])
+def send_smtp_email():
+    data = request.json
+    sender = data.get('sender')
+    recipient = data.get('recipient')
+    subject = data.get('subject')
+    body = data.get('body')
+
+    # Set up the MIME
+    message = MIMEMultipart()
+    message['From'] = sender
+    message['To'] = recipient
+    message['Subject'] = subject
+    message.attach(MIMEText(body, 'plain'))
+
+    # SMTP details
+    smtp_server = "email-smtp.ap-south-1.amazonaws.com"
+    smtp_port = 587  # You can also use 25 or 2587
+    smtp_username = "username"  # Replace with your SMTP username
+    smtp_password = "pass"  # Replace with your SMTP password
+
+    # Send the email
+    try:
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(smtp_username, smtp_password)
+            server.sendmail(sender, recipient, message.as_string())
+        return jsonify({'message': 'Email sent successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 
 if __name__ == '__main__':
