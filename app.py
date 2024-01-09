@@ -1,8 +1,10 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, jsonify
 import requests
 import os
 import random
 import tldextract
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 app = Flask(__name__)
 
@@ -45,6 +47,30 @@ def fetch_url():
 
     # Return the content
     return response.content
+
+@app.route('/send-email', methods=['POST'])
+def send_email():
+    data = request.json
+    sender = data.get('sender')
+    recipient = data.get('recipient')
+    subject = data.get('subject')
+    body = data.get('body')
+
+    message = Mail(
+        from_email=sender,
+        to_emails=recipient,
+        subject=subject,
+        html_content=body
+    )
+
+    try:
+        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        response = sg.send(message)
+        return jsonify({'status_code': response.status_code, 'body': response.body, 'headers': response.headers})
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
