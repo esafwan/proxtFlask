@@ -25,6 +25,8 @@ def ping():
 @app.route('/fetch')
 def fetch_url():
     target_url = request.args.get('url')
+    live = request.args.get('live', 'false').lower() == 'true'
+
     if not target_url:
         return "Missing URL", 400
 
@@ -34,6 +36,11 @@ def fetch_url():
     # Send request
     response = requests.get(target_url, headers=headers)
 
+    if not live:
+        # Return the HTML content as plain text
+        return response.text, {'Content-Type': 'text/plain'}
+
+    # The rest of the code is executed if live is true
     # Extract base domain to name the folder
     ext = tldextract.extract(target_url)
     base_domain = "{}.{}".format(ext.domain, ext.suffix)
@@ -50,6 +57,7 @@ def fetch_url():
 
     # Return the content
     return response.content
+
 
 @app.route('/send-email', methods=['POST'])
 def send_email():
