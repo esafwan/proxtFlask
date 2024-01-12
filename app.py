@@ -8,6 +8,7 @@ from sendgrid.helpers.mail import Mail
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
@@ -30,15 +31,18 @@ def fetch_url():
     if not target_url:
         return "Missing URL", 400
 
-    # Randomize user agent
     headers = {'User-Agent': random.choice(user_agents)}
-
-    # Send request
     response = requests.get(target_url, headers=headers)
 
     if not live:
-        # Return the HTML content as plain text
-        return response.text, {'Content-Type': 'text/plain'}
+        # Parse the HTML content and extract the body tag
+        soup = BeautifulSoup(response.content, 'html.parser')
+        body_content = soup.find('body')
+
+        if body_content:
+            return body_content.get_text(), {'Content-Type': 'text/plain'}
+        else:
+            return "No body tag found", 400
 
     # The rest of the code is executed if live is true
     # Extract base domain to name the folder
@@ -57,6 +61,7 @@ def fetch_url():
 
     # Return the content
     return response.content
+
 
 
 @app.route('/send-email', methods=['POST'])
